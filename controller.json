@@ -1,0 +1,17 @@
+[
+    {
+        "path": "C:\\",
+        "ignore": [
+            "lnk",
+            "url"
+        ]
+    },
+    {
+        "path": "C:\\Users\\",
+        "ignore": [
+            "lnk",
+            "png",
+            "pyw"
+        ]
+    }
+]
