@@ -35,4 +35,7 @@ def foldersort(path: str, ignore: list) -> None:
 
 
 if __name__ == "__main__":
-    foldersort(argv[1], argv[2].split(":"))
+    try:
+        foldersort(argv[1], argv[2].split(":"))
+    except IndexError:
+        foldersort(argv[1], [])
