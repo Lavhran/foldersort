@@ -140,17 +140,15 @@ class Window(Tk):
             pass
 
     def load(self, buttonevent=None) -> None:
-        path = self.pathbox.get(self.pathbox.curselection()[0])
-        if path == NEWPATH:
+        try:
+            path = self.json[self.pathbox.curselection()[0]]
+            self.selectedpath = path['path']
+            self.selectedignore = path['ignore']
+            self.updateInfoFrame(path)
+        except IndexError:
             self.selectedpath = NEWPATH
             self.selectedignore = []
             self.updateInfoFrame({'path': NEWPATH})
-        else:
-            for i in self.json:
-                if i['path'] == path:
-                    self.selectedpath = i['path']
-                    self.selectedignore = i['ignore']
-                    self.updateInfoFrame(i)
 
     def save(self):
         index = None
