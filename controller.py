@@ -82,7 +82,10 @@ class Window(Tk):
     def updatePathbox(self) -> None:
         self.pathbox.delete(0, END)
         for path in self.json:
-            self.pathbox.insert(END, path['path'])
+            if len(glob(path['path']+BATFILENAME)):
+                self.pathbox.insert(END, path['path'])
+            else:
+                self.pathbox.insert(END, '!'+path['path'])
 
     def addPath(self) -> None:
         self.pathbox.insert(END, NEWPATH)
