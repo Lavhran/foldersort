@@ -1,6 +1,5 @@
 import json
 from tkinter import *
-from functools import partial
 from glob import glob
 from os import remove as removeFile
 import pathlib
@@ -19,6 +18,7 @@ def loadJson(path: str) -> list:
         return []
 
 
+JSONPATH = 'controller.json'
 BATFILENAME = "\\sort.bat"
 NEWPATH = "!newpath"
 
@@ -41,7 +41,7 @@ class Window(Tk):
         self.title('foldersort controller')
         self.minsize(400, 200)
 
-        self.json = loadJson('controller.json')
+        self.json = loadJson(JSONPATH)
         self.selectedpath = None
         self.selectedignore = None
 
@@ -63,6 +63,7 @@ class Window(Tk):
         pathscroll = Scrollbar(self.selectionframe, command=self.pathbox.yview)
 
         self.pathbox.configure(yscrollcommand=pathscroll.set)
+        self.pathbox.bind('<Double-Button-1>', self.load)
 
         self.updatePathbox()
 
@@ -74,8 +75,7 @@ class Window(Tk):
         self.infoframe.grid(column=1, row=0)
 
         save.configure(command=self.save)
-        load.configure(command=lambda: self.load(
-            self.pathbox.get(self.pathbox.curselection()[0])))
+        load.configure(command=self.load)
         add.configure(command=self.addPath)
         remove.configure(command=self.removePath)
 
@@ -91,6 +91,7 @@ class Window(Tk):
         index = self.pathbox.curselection()[0]
         self.pathbox.delete(index)
         removeBat(self.json.pop(index)['path'])
+        saveJson(JSONPATH, self.json)
 
     def updateInfoFrame(self, path: dict) -> None:
         for i in self.infoframe.winfo_children():
@@ -138,7 +139,8 @@ class Window(Tk):
         except ValueError:
             pass
 
-    def load(self, path: str) -> None:
+    def load(self, buttonevent=None) -> None:
+        path = self.pathbox.get(self.pathbox.curselection()[0])
         if path == NEWPATH:
             self.selectedpath = NEWPATH
             self.selectedignore = []
@@ -174,7 +176,7 @@ class Window(Tk):
 
             self.selectedpath = self.pathentry.get()
 
-            saveJson('controller.json', self.json)
+            saveJson(JSONPATH, self.json)
             self.updatePathbox()
 
 
