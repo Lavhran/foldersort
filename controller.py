@@ -1,6 +1,9 @@
 import json
 from tkinter import *
 from functools import partial
+from glob import glob
+from os import remove as removeFile
+import pathlib
 
 
 def saveJson(path: str, content: list) -> None:
@@ -9,8 +12,26 @@ def saveJson(path: str, content: list) -> None:
 
 
 def loadJson(path: str) -> list:
-    with open(path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+
+BATFILENAME = "\\sort.bat"
+NEWPATH = "!newpath"
+
+
+def createBat(path: str, args: list) -> None:
+    currentpath = pathlib.Path().resolve()
+    with open(path+BATFILENAME, 'w', encoding='utf-8') as shortcut:
+        shortcut.write(f'{currentpath}\\foldersort.py {path} {":".join(args)}')
+
+
+def removeBat(path: str) -> None:
+    if len(glob(path+BATFILENAME)):
+        removeFile(path+BATFILENAME)
 
 
 class Window(Tk):
@@ -30,22 +51,23 @@ class Window(Tk):
         toolframe = Frame(self.selectionframe)
         save = Button(toolframe, width=30, text='save')
         load = Button(toolframe, width=30, text='load')
-        new = Button(toolframe, width=30, text="new")
+        add = Button(toolframe, width=30, text="add")
+        remove = Button(toolframe, width=30, text="remove")
 
         save.grid(column=0, row=0, sticky=(W, E))
         load.grid(column=0, row=1, sticky=(W, E))
-        new.grid(column=0, row=2, sticky=(W, E))
+        add.grid(column=0, row=2, sticky=(W, E))
+        remove.grid(column=0, row=3, sticky=(W, E))
 
-        pathbox = Listbox(self.selectionframe, width=30)
-        pathscroll = Scrollbar(self.selectionframe, command=pathbox.yview)
+        self.pathbox = Listbox(self.selectionframe, width=30)
+        pathscroll = Scrollbar(self.selectionframe, command=self.pathbox.yview)
 
-        pathbox.configure(yscrollcommand=pathscroll.set)
+        self.pathbox.configure(yscrollcommand=pathscroll.set)
 
-        for path in self.json:
-            pathbox.insert(END, path['path'])
+        self.updatePathbox()
 
         toolframe.grid(column=0, row=0, columnspan=2)
-        pathbox.grid(column=0, row=1, sticky=(W, E))
+        self.pathbox.grid(column=0, row=1, sticky=(W, E))
         pathscroll.grid(column=1, row=1, sticky=NSEW)
 
         self.selectionframe.grid(column=0, row=0)
@@ -53,14 +75,22 @@ class Window(Tk):
 
         save.configure(command=self.save)
         load.configure(command=lambda: self.load(
-            pathbox.get(pathbox.curselection()[0])))
+            self.pathbox.get(self.pathbox.curselection()[0])))
+        add.configure(command=self.addPath)
+        remove.configure(command=self.removePath)
 
-    def load(self, path: str) -> None:
-        for i in self.json:
-            if i['path'] == path:
-                self.selectedpath = i['path']
-                self.selectedignore = i['ignore']
-                self.updateInfoFrame(i)
+    def updatePathbox(self) -> None:
+        self.pathbox.delete(0, END)
+        for path in self.json:
+            self.pathbox.insert(END, path['path'])
+
+    def addPath(self) -> None:
+        self.pathbox.insert(END, NEWPATH)
+
+    def removePath(self) -> None:
+        index = self.pathbox.curselection()[0]
+        self.pathbox.delete(index)
+        removeBat(self.json.pop(index)['path'])
 
     def updateInfoFrame(self, path: dict) -> None:
         for i in self.infoframe.winfo_children():
@@ -73,7 +103,8 @@ class Window(Tk):
         ignorelabel = Label(self.infoframe, text='ignored:')
         self.ignoreentry = Entry(self.infoframe, width=10)
         addbutton = Button(self.infoframe, text='+', command=self.addIgnored)
-        removebutton = Button(self.infoframe, text='-')
+        removebutton = Button(self.infoframe, text='-',
+                              command=self.removeIgnored)
 
         self.ignorebox = Listbox(self.infoframe)
         ignorescroll = Scrollbar(self.infoframe, command=self.ignorebox.yview)
@@ -95,24 +126,56 @@ class Window(Tk):
         ignorescroll.grid(column=4, row=3, sticky=NSEW)
 
     def addIgnored(self) -> None:
+        self.ignorebox.insert(END, self.ignoreentry.get())
+        self.selectedignore.append(self.ignoreentry.get())
+
+    def removeIgnored(self) -> None:
         try:
-            self.ignorebox.insert(END, self.ignoreentry.get())
-            self.selectedignore.append(self.ignoreentry.get())
-        except:
+            removeindex = self.ignorebox.get(
+                0, END).index(self.ignoreentry.get())
+            self.ignorebox.delete(removeindex)
+            self.selectedignore.remove(self.ignoreentry.get())
+        except ValueError:
             pass
+
+    def load(self, path: str) -> None:
+        if path == NEWPATH:
+            self.selectedpath = NEWPATH
+            self.selectedignore = []
+            self.updateInfoFrame({'path': NEWPATH})
+        else:
+            for i in self.json:
+                if i['path'] == path:
+                    self.selectedpath = i['path']
+                    self.selectedignore = i['ignore']
+                    self.updateInfoFrame(i)
 
     def save(self):
         index = None
         for i in range(len(self.json)):
             if self.json[i]['path'] == self.selectedpath:
                 index = i
-        if not index:
+        if index == None and self.selectedpath != NEWPATH:
             return
         else:
+            if self.pathentry.get() == NEWPATH:
+                return
+
+            createBat(self.pathentry.get(), self.selectedignore)
+            if self.pathentry.get() != self.selectedpath:
+                removeBat(self.selectedpath)
+
+            if self.selectedpath == NEWPATH:
+                self.json.append({'path': None, 'ignore': None})
+                index = len(self.json) - 1
+
             self.json[index]['path'] = self.pathentry.get()
             self.json[index]['ignore'] = self.selectedignore
 
-        saveJson('controller.json', self.json)
+            self.selectedpath = self.pathentry.get()
+
+            saveJson('controller.json', self.json)
+            self.updatePathbox()
 
 
 root = Window()
