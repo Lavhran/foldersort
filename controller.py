@@ -27,7 +27,8 @@ NEWPATH = "!newpath"
 def createBat(path: str, args: list) -> None:
     currentpath = pathlib.Path().resolve()
     with open(path+BATFILENAME, 'w', encoding='utf-8') as shortcut:
-        shortcut.write(f'{currentpath}\\foldersort.py {path} {":".join(args)}')
+        shortcut.write(
+            f'python {currentpath}\\foldersort.py {path} {":".join(args)}')
 
 
 def removeBat(path: str) -> None:
