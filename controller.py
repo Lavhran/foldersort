@@ -40,7 +40,7 @@ class Window(Tk):
         super().__init__()
 
         self.title('foldersort controller')
-        self.minsize(400, 200)
+        self.minsize(550, 200)
 
         self.json = loadJson(JSONPATH)
         self.selectedpath = None
@@ -73,7 +73,8 @@ class Window(Tk):
         pathscroll.grid(column=1, row=1, sticky=NSEW)
 
         self.selectionframe.grid(column=0, row=0)
-        self.infoframe.grid(column=1, row=0)
+        Label(text='\t').grid(column=1, row=0)  # divider
+        self.infoframe.grid(column=2, row=0)
 
         save.configure(command=self.save)
         load.configure(command=self.load)
@@ -98,15 +99,19 @@ class Window(Tk):
         for i in self.infoframe.winfo_children():
             i.destroy()
 
-        pathlabel = Label(self.infoframe, text='Path:')
-        self.pathentry = Entry(self.infoframe, width=30)
-        self.pathentry.insert(0, path['path'])
-        pathbutton = Button(self.infoframe, text='find', command=self.getPath)
+        pathframe = Frame(self.infoframe)
 
-        ignorelabel = Label(self.infoframe, text='ignored:')
-        self.ignoreentry = Entry(self.infoframe, width=10)
-        addbutton = Button(self.infoframe, text='+', command=self.addIgnored)
-        removebutton = Button(self.infoframe, text='-',
+        pathlabel = Label(pathframe, text='Path:')
+        self.pathentry = Entry(pathframe, width=20)
+        self.pathentry.insert(0, path['path'])
+        pathbutton = Button(pathframe, text='find', command=self.getPath)
+
+        ignoreframe = Frame(self.infoframe)
+
+        ignorelabel = Label(ignoreframe, text='ignored:')
+        self.ignoreentry = Entry(ignoreframe, width=10)
+        addbutton = Button(ignoreframe, text='+', command=self.addIgnored)
+        removebutton = Button(ignoreframe, text='-',
                               command=self.removeIgnored)
 
         self.ignorebox = Listbox(self.infoframe)
@@ -117,14 +122,18 @@ class Window(Tk):
         for i in self.selectedignore:
             self.ignorebox.insert(END, i)
 
-        pathlabel.grid(column=0, row=0)
-        self.pathentry.grid(column=1, row=0)
-        pathbutton.grid(column=2, row=0)
+        pathframe.grid(column=1, row=0, columnspan=2)
 
-        ignorelabel.grid(column=0, row=1)
-        self.ignoreentry.grid(column=0, row=2, sticky=(W, E))
-        addbutton.grid(column=1, row=2, sticky=(W, E))
-        removebutton.grid(column=2, row=2, sticky=(W, E))
+        pathlabel.grid(column=0, row=0)
+        self.pathentry.grid(column=0, row=1)
+        pathbutton.grid(column=1, row=1)
+
+        ignoreframe.grid(column=0, row=0)
+
+        ignorelabel.grid(column=0, row=0)
+        self.ignoreentry.grid(column=0, row=1, sticky=(W, E))
+        addbutton.grid(column=2, row=0, sticky=(W, E))
+        removebutton.grid(column=2, row=1, sticky=(W, E))
 
         self.ignorebox.grid(column=0, row=3, columnspan=3, sticky=(W, E))
         ignorescroll.grid(column=4, row=3, sticky=NSEW)
