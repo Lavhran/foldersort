@@ -1,5 +1,6 @@
 import json
 from tkinter import *
+from tkinter import filedialog as tkfd
 from glob import glob
 from os import remove as removeFile
 import pathlib
@@ -97,9 +98,10 @@ class Window(Tk):
         for i in self.infoframe.winfo_children():
             i.destroy()
 
-        label = Label(self.infoframe, text='Path:')
+        pathlabel = Label(self.infoframe, text='Path:')
         self.pathentry = Entry(self.infoframe, width=30)
         self.pathentry.insert(0, path['path'])
+        pathbutton = Button(self.infoframe, text='find', command=self.getPath)
 
         ignorelabel = Label(self.infoframe, text='ignored:')
         self.ignoreentry = Entry(self.infoframe, width=10)
@@ -115,8 +117,9 @@ class Window(Tk):
         for i in self.selectedignore:
             self.ignorebox.insert(END, i)
 
-        label.grid(column=0, row=0)
-        self.pathentry.grid(column=1, row=0, columnspan=2)
+        pathlabel.grid(column=0, row=0)
+        self.pathentry.grid(column=1, row=0)
+        pathbutton.grid(column=2, row=0)
 
         ignorelabel.grid(column=0, row=1)
         self.ignoreentry.grid(column=0, row=2, sticky=(W, E))
@@ -125,6 +128,13 @@ class Window(Tk):
 
         self.ignorebox.grid(column=0, row=3, columnspan=3, sticky=(W, E))
         ignorescroll.grid(column=4, row=3, sticky=NSEW)
+
+    def getPath(self) -> None:
+        directory = tkfd.askdirectory()
+        directory = directory.replace('/', '\\')
+        if directory != "":
+            self.pathentry.delete(0, END)
+            self.pathentry.insert(END, directory)
 
     def addIgnored(self) -> None:
         self.ignorebox.insert(END, self.ignoreentry.get())
