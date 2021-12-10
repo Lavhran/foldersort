@@ -41,7 +41,7 @@ class Window(Tk):
         super().__init__()
 
         self.title('foldersort controller')
-        self.minsize(550, 200)
+        self.minsize(550, 250)
 
         self.json = loadJson(JSONPATH)
         self.selectedpath = None
@@ -51,17 +51,13 @@ class Window(Tk):
         self.infoframe = Frame()
 
         toolframe = Frame(self.selectionframe)
-        save = Button(toolframe, width=30, text='save')
-        load = Button(toolframe, width=30, text='load')
-        add = Button(toolframe, width=30, text="add")
-        remove = Button(toolframe, width=30, text="remove")
+        add = Button(toolframe, width=15, text="+")
+        remove = Button(toolframe, width=15, text="-")
 
-        save.grid(column=0, row=0, sticky=(W, E))
-        load.grid(column=0, row=1, sticky=(W, E))
-        add.grid(column=0, row=2, sticky=(W, E))
-        remove.grid(column=0, row=3, sticky=(W, E))
+        add.grid(column=0, row=0, sticky=(W, E))
+        remove.grid(column=1, row=0, sticky=(W, E))
 
-        self.pathbox = Listbox(self.selectionframe, width=30)
+        self.pathbox = Listbox(self.selectionframe, width=30, height=14)
         pathscroll = Scrollbar(self.selectionframe, command=self.pathbox.yview)
 
         self.pathbox.configure(yscrollcommand=pathscroll.set)
@@ -69,7 +65,7 @@ class Window(Tk):
 
         self.updatePathbox()
 
-        toolframe.grid(column=0, row=0, columnspan=2)
+        toolframe.grid(column=0, row=2, columnspan=2)
         self.pathbox.grid(column=0, row=1, sticky=(W, E))
         pathscroll.grid(column=1, row=1, sticky=NSEW)
 
@@ -77,8 +73,6 @@ class Window(Tk):
         Label(text='\t').grid(column=1, row=0)  # divider
         self.infoframe.grid(column=2, row=0)
 
-        save.configure(command=self.save)
-        load.configure(command=self.load)
         add.configure(command=self.addPath)
         remove.configure(command=self.removePath)
 
@@ -126,6 +120,8 @@ class Window(Tk):
         for i in self.selectedignore:
             self.ignorebox.insert(END, i)
 
+        savebutton = Button(self.infoframe, text='save', command=self.save)
+
         pathframe.grid(column=1, row=0, columnspan=2)
 
         pathlabel.grid(column=0, row=0)
@@ -141,6 +137,8 @@ class Window(Tk):
 
         self.ignorebox.grid(column=0, row=3, columnspan=3, sticky=(W, E))
         ignorescroll.grid(column=4, row=3, sticky=NSEW)
+
+        savebutton.grid(column=0, row=4, columnspan=5, sticky=(W, E))
 
     def getPath(self) -> None:
         directory = tkfd.askdirectory()
