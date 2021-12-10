@@ -65,7 +65,7 @@ class Window(Tk):
 
         self.updatePathbox()
 
-        toolframe.grid(column=0, row=2, columnspan=2)
+        toolframe.grid(column=0, row=2)
         self.pathbox.grid(column=0, row=1, sticky=(W, E))
         pathscroll.grid(column=1, row=1, sticky=NSEW)
 
@@ -100,20 +100,22 @@ class Window(Tk):
         pathframe = Frame(self.infoframe)
 
         pathlabel = Label(pathframe, text='Path:')
-        self.pathentry = Entry(pathframe, width=20)
+        self.pathentry = Entry(pathframe, width=32)
         self.pathentry.insert(0, path['path'])
         pathbutton = Button(pathframe, text='find', command=self.getPath)
 
         ignoreframe = Frame(self.infoframe)
+        ignorecontrolframe = Frame(ignoreframe)
 
-        ignorelabel = Label(ignoreframe, text='ignored:')
-        self.ignoreentry = Entry(ignoreframe, width=10)
-        addbutton = Button(ignoreframe, text='+', command=self.addIgnored)
-        removebutton = Button(ignoreframe, text='-',
+        ignorelabel = Label(ignorecontrolframe, text='ignored:')
+        self.ignoreentry = Entry(ignorecontrolframe, width=10)
+        addbutton = Button(ignorecontrolframe, text='+',
+                           command=self.addIgnored)
+        removebutton = Button(ignorecontrolframe, text='-',
                               command=self.removeIgnored)
 
-        self.ignorebox = Listbox(self.infoframe)
-        ignorescroll = Scrollbar(self.infoframe, command=self.ignorebox.yview)
+        self.ignorebox = Listbox(ignoreframe, height=5)
+        ignorescroll = Scrollbar(ignoreframe, command=self.ignorebox.yview)
 
         self.ignorebox.configure(yscrollcommand=ignorescroll.set)
 
@@ -122,23 +124,24 @@ class Window(Tk):
 
         savebutton = Button(self.infoframe, text='save', command=self.save)
 
-        pathframe.grid(column=1, row=0, columnspan=2)
+        pathframe.grid(column=0, row=0)
 
         pathlabel.grid(column=0, row=0)
-        self.pathentry.grid(column=0, row=1)
-        pathbutton.grid(column=1, row=1)
+        self.pathentry.grid(column=1, row=0)
+        pathbutton.grid(column=2, row=0)
 
-        ignoreframe.grid(column=0, row=0)
+        ignoreframe.grid(column=0, row=1)
+        ignorecontrolframe.grid(column=0, row=0)
 
         ignorelabel.grid(column=0, row=0)
-        self.ignoreentry.grid(column=0, row=1, sticky=(W, E))
-        addbutton.grid(column=2, row=0, sticky=(W, E))
-        removebutton.grid(column=2, row=1, sticky=(W, E))
+        self.ignoreentry.grid(column=1, row=0, sticky=(W, E))
+        addbutton.grid(column=1, row=1, sticky=(W, E))
+        removebutton.grid(column=1, row=2, sticky=(W, E))
 
-        self.ignorebox.grid(column=0, row=3, columnspan=3, sticky=(W, E))
-        ignorescroll.grid(column=4, row=3, sticky=NSEW)
+        self.ignorebox.grid(column=1, row=0, sticky=(W, E))
+        ignorescroll.grid(column=2, row=0, sticky=NSEW)
 
-        savebutton.grid(column=0, row=4, columnspan=5, sticky=(W, E))
+        savebutton.grid(column=0, row=2, sticky=(W, E))
 
     def getPath(self) -> None:
         directory = tkfd.askdirectory()
