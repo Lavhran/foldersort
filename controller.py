@@ -1,6 +1,7 @@
 import json
 from tkinter import *
 from tkinter import filedialog as tkfd
+from ctypes import windll
 from glob import glob
 from os import remove as removeFile
 import pathlib
@@ -41,14 +42,18 @@ class Window(Tk):
         super().__init__()
 
         self.title('foldersort controller')
-        self.minsize(550, 250)
+        self.minsize(770, 255)
+        self.configure(background='darkgrey')
 
         self.json = loadJson(JSONPATH)
-        self.selectedpath = None
-        self.selectedignore = None
+        self.selectedpath = NEWPATH
+        self.selectedignore = []
 
-        self.selectionframe = Frame()
-        self.infoframe = Frame()
+        self.centerframe = Frame()
+        self.centerframe.pack(side=TOP, ipadx=3)
+
+        self.selectionframe = Frame(self.centerframe)
+        self.infoframe = Frame(self.centerframe)
 
         toolframe = Frame(self.selectionframe)
         add = Button(toolframe, width=15, text="+")
@@ -57,7 +62,7 @@ class Window(Tk):
         add.grid(column=0, row=0, sticky=(W, E))
         remove.grid(column=1, row=0, sticky=(W, E))
 
-        self.pathbox = Listbox(self.selectionframe, width=30, height=14)
+        self.pathbox = Listbox(self.selectionframe, width=30, height=8)
         pathscroll = Scrollbar(self.selectionframe, command=self.pathbox.yview)
 
         self.pathbox.configure(yscrollcommand=pathscroll.set)
@@ -70,11 +75,12 @@ class Window(Tk):
         pathscroll.grid(column=1, row=1, sticky=NSEW)
 
         self.selectionframe.grid(column=0, row=0)
-        Label(text='\t').grid(column=1, row=0)  # divider
         self.infoframe.grid(column=2, row=0)
 
         add.configure(command=self.addPath)
         remove.configure(command=self.removePath)
+
+        self.updateInfoFrame({'path': NEWPATH})
 
     def updatePathbox(self) -> None:
         self.pathbox.delete(0, END)
@@ -201,6 +207,8 @@ class Window(Tk):
             saveJson(JSONPATH, self.json)
             self.updatePathbox()
 
+
+windll.shcore.SetProcessDpiAwareness(1)
 
 root = Window()
 
