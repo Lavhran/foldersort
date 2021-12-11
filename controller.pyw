@@ -23,13 +23,22 @@ def loadJson(path: str) -> list:
 JSONPATH = 'controller.json'
 BATFILENAME = "\\sort.bat"
 NEWPATH = "!newpath"
+DEFAULT_IGNORES = ['bat', 'ps1', 'ini', 'lnk', 'url']
 
 
 def createBat(path: str, args: list) -> None:
     currentpath = pathlib.Path().resolve()
+
+    outputargs = args.copy()
+
+    if 'ALLOW_DEFAULTS' in args:
+        outputargs.remove('ALLOW_DEFAULTS')
+    else:
+        outputargs += DEFAULT_IGNORES
+
     with open(path+BATFILENAME, 'w', encoding='utf-8') as shortcut:
         shortcut.write(
-            f'python {currentpath}\\foldersort.py {path} {":".join(args)}')
+            f'python {currentpath}\\foldersort.py {path} {":".join(outputargs)}')
 
 
 def removeBat(path: str) -> None:
