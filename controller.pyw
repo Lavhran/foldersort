@@ -133,6 +133,7 @@ class Window(Tk):
         ignorescroll = Scrollbar(ignoreframe, command=self.ignorebox.yview)
 
         self.ignorebox.configure(yscrollcommand=ignorescroll.set)
+        self.ignorebox.bind('<Double-Button-1>', self.selectIgnored)
 
         for i in self.selectedignore:
             self.ignorebox.insert(END, i)
@@ -165,9 +166,15 @@ class Window(Tk):
             self.pathentry.delete(0, END)
             self.pathentry.insert(END, directory)
 
+    def selectIgnored(self, event=None) -> None:
+        filetype = self.ignorebox.get(self.ignorebox.curselection())
+        self.ignoreentry.delete(0, END)
+        self.ignoreentry.insert(END, filetype)
+
     def addIgnored(self) -> None:
         self.ignorebox.insert(END, self.ignoreentry.get())
         self.selectedignore.append(self.ignoreentry.get())
+        self.ignoreentry.delete(0, END)
 
     def removeIgnored(self) -> None:
         try:
@@ -175,6 +182,7 @@ class Window(Tk):
                 0, END).index(self.ignoreentry.get())
             self.ignorebox.delete(removeindex)
             self.selectedignore.remove(self.ignoreentry.get())
+            self.ignoreentry.delete(0, END)
         except ValueError:
             pass
 
