@@ -27,11 +27,18 @@ def foldersort(path: str, ignore: list) -> None:
         except:
             continue
 
+    files.sort(reverse=True)
+
     for file in files:
         destination = "{0}\\{1}\\".format(path, file.split('.')[-1])
-        while len(getPath(destination+file)):
-            rename(file, f'_{file}')
-        move(file, destination)
+        file = file.split('\\')
+        file = ["\\".join(file[:-1]), file[-1]]
+        
+        while len(getPath(destination+file[1])):
+            rename("\\".join(file), file[0] + '\\_' + file[1])
+            file[1] = '_' + file[1]
+
+        move("\\".join(file), destination)
 
 
 if __name__ == "__main__":
